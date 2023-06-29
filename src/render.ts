@@ -1,5 +1,5 @@
-import { GameBoard } from './interactiveBoard';
+import { GameBoard } from './gameBoard';
 
 export const renderBoard = (board: GameBoard) => {
-    // TODO: render, possibly window.requestAnimationFrame
+    window.requestAnimationFrame(() => renderBoard(board));
 };

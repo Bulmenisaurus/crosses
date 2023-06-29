@@ -1,4 +1,4 @@
-import { GameBoard } from './interactiveBoard';
+import { GameBoard } from './gameBoard';
 import { renderBoard } from './render';
 
 const main = async (mainElement: HTMLElement) => {

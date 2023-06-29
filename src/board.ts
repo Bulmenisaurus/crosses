@@ -1,4 +1,4 @@
-import { GameBoard } from './interactiveBoard';
+import { GameBoard } from './gameBoard';
 import { Move } from './moves';
 import { Piece, Player, Tile } from './types';
 
