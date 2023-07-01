@@ -1,1 +1,1 @@
-# crosses
+# tic-tac-toe
