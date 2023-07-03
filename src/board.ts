@@ -5,10 +5,7 @@ import { Piece, Player, Tile } from './types';
 export class Board {
     pieces: Array<Piece>;
     constructor() {
-        this.pieces = [
-            { x: 1, y: 1, type: 'circle' },
-            { x: 0, y: 0, type: 'cross' },
-        ];
+        this.pieces = [];
     }
 
     getPiece(x: number, y: number): Player | undefined {
