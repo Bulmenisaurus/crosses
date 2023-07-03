@@ -52,8 +52,11 @@ const drawPieces = (
     // TODO: filter out pieces not in viewport
     for (const piece of board.board.pieces) {
         if (piece.type === 'cross') {
-            const pieceCanvasCoord = interactiveCanvas.gameToCanvasCoord(piece.x, piece.y);
-            const size = interactiveCanvas.gameToCanvasDistance(1);
+            const pieceCanvasCoord = interactiveCanvas.gameToCanvasCoord(
+                piece.x + 0.2,
+                piece.y + 0.2
+            );
+            const size = interactiveCanvas.gameToCanvasDistance(0.6);
 
             ctx.fillStyle = 'red';
 
@@ -63,7 +66,7 @@ const drawPieces = (
                 piece.x + 1 / 2,
                 piece.y + 1 / 2
             );
-            const radius = interactiveCanvas.gameToCanvasDistance(1 / 2);
+            const radius = interactiveCanvas.gameToCanvasDistance((1 / 2) * (2 / 3));
 
             ctx.fillStyle = 'blue';
 

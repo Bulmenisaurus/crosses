@@ -245,8 +245,11 @@
         const viewPort = interactiveCanvas.getViewPort();
         for (const piece of board.board.pieces) {
           if (piece.type === "cross") {
-            const pieceCanvasCoord = interactiveCanvas.gameToCanvasCoord(piece.x, piece.y);
-            const size = interactiveCanvas.gameToCanvasDistance(1);
+            const pieceCanvasCoord = interactiveCanvas.gameToCanvasCoord(
+              piece.x + 0.2,
+              piece.y + 0.2
+            );
+            const size = interactiveCanvas.gameToCanvasDistance(0.6);
             ctx.fillStyle = "red";
             ctx.fillRect(pieceCanvasCoord.x, pieceCanvasCoord.y, size, size);
           } else {
@@ -254,7 +257,7 @@
               piece.x + 1 / 2,
               piece.y + 1 / 2
             );
-            const radius = interactiveCanvas.gameToCanvasDistance(1 / 2);
+            const radius = interactiveCanvas.gameToCanvasDistance(1 / 2 * (2 / 3));
             ctx.fillStyle = "blue";
             ctx.beginPath();
             ctx.arc(pieceCanvasCoord.x, pieceCanvasCoord.y, radius, 0, Math.PI * 2);
