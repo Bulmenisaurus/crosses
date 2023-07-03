@@ -127,10 +127,7 @@
       "use strict";
       Board = class {
         constructor() {
-          this.pieces = [
-            { x: 1, y: 1, type: "circle" },
-            { x: 0, y: 0, type: "cross" }
-          ];
+          this.pieces = [];
         }
         getPiece(x, y) {
           var _a;
@@ -365,14 +362,17 @@
           this.canvasIsDragging = true;
           this.canvasStartPanX = e.offsetX;
           this.canvasStartPanY = e.offsetY;
-          this.clickEvent.publish(e);
         }
         onMouseUp(e) {
           this.canvasIsDragging = false;
           this.cameraPositionX += this.cameraPanDeltaX;
           this.cameraPositionY += this.cameraPanDeltaY;
+          const isClick = this.cameraPanDeltaX ** 2 + this.cameraPanDeltaY ** 2 <= 1;
           this.cameraPanDeltaX = 0;
           this.cameraPanDeltaY = 0;
+          if (isClick) {
+            this.clickEvent.publish(e);
+          }
         }
         onMouseMove(e) {
           if (!this.canvasIsDragging) {

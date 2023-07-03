@@ -90,7 +90,6 @@ export class ScrollableCanvas {
         this.canvasIsDragging = true;
         this.canvasStartPanX = e.offsetX;
         this.canvasStartPanY = e.offsetY;
-        this.clickEvent.publish(e);
     }
 
     onMouseUp(e: MouseEvent) {
@@ -99,8 +98,16 @@ export class ScrollableCanvas {
         this.cameraPositionX += this.cameraPanDeltaX;
         this.cameraPositionY += this.cameraPanDeltaY;
 
+        const isClick = this.cameraPanDeltaX ** 2 + this.cameraPanDeltaY ** 2 <= 1;
+
         this.cameraPanDeltaX = 0;
         this.cameraPanDeltaY = 0;
+
+        // we shouldn't place a piece if a click occurred when moving the screen
+        // TODO: what if the user moves the mouse a lot, but it eventually returns to it's original location?
+        if (isClick) {
+            this.clickEvent.publish(e);
+        }
     }
 
     onMouseMove(e: MouseEvent) {
