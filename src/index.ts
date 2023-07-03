@@ -1,5 +1,6 @@
 import { GameBoard } from './gameBoard';
 import { renderBoard } from './render';
+import { ScrollableCanvas } from './scrollableCanvas';
 
 const main = async (mainElement: HTMLElement) => {
     const boardContainer = document.createElement('canvas');
@@ -8,7 +9,15 @@ const main = async (mainElement: HTMLElement) => {
     mainElement.appendChild(boardContainer);
 
     const board = new GameBoard(boardContainer);
-    renderBoard(board);
+    const interactiveCanvas = new ScrollableCanvas(boardContainer);
+
+    // TODO: prevent clicking when scrolling
+
+    interactiveCanvas.clickEvent.subscribe((e) => {
+        board.onClick(e, interactiveCanvas);
+    });
+
+    renderBoard(board, interactiveCanvas);
 };
 
 window.addEventListener('load', () => {

@@ -5,15 +5,18 @@ import { Piece, Player, Tile } from './types';
 export class Board {
     pieces: Array<Piece>;
     constructor() {
-        this.pieces = [];
+        this.pieces = [
+            { x: 1, y: 1, type: 'circle' },
+            { x: 0, y: 0, type: 'cross' },
+        ];
     }
 
-    getPiece(x: number, y: number): Player {
-        //!TODO
+    getPiece(x: number, y: number): Player | undefined {
+        return this.pieces.find((p) => p.x === x && p.y === y)?.type;
     }
 
     setPiece(x: number, y: number, piece: Player) {
-        //!TODO
+        this.pieces.push({ x, y, type: piece });
     }
 
     removePiece(x: number, y: number) {

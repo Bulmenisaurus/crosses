@@ -1,6 +1,7 @@
 import { findMove } from './ai';
 import { Board } from './board';
 import { Move } from './moves';
+import { ScrollableCanvas } from './scrollableCanvas';
 import { Player, Piece, Tile, Difficulty } from './types';
 
 export class GameBoard {
@@ -13,10 +14,6 @@ export class GameBoard {
         this.currentTurn = 'cross';
         this.boardElement = boardElement;
         this.difficulty = 'easy';
-
-        boardElement.addEventListener('click', (ev) => {
-            this.onClick(ev);
-        });
     }
 
     setPiece(x: number, y: number, pieceType: Player) {
@@ -27,19 +24,16 @@ export class GameBoard {
         return this.board.getTileColor(x, y);
     }
 
-    onClick(event: MouseEvent) {
+    onClick(event: MouseEvent, scrollableCanvas: ScrollableCanvas) {
         const mouseX = event.offsetX;
         const mouseY = event.offsetY;
 
-        const boardFractionX = mouseX / this.boardElement.getBoundingClientRect().width;
-        const boardFractionY = mouseY / this.boardElement.getBoundingClientRect().height;
+        const { x, y } = scrollableCanvas.canvasToGameCoord(mouseX, mouseY);
 
-        // TODO: calculate the actual tile that was clicked
+        const boardTileX = Math.floor(x);
+        const boardTileY = Math.floor(y);
 
-        // const boardTileX = Math.floor(boardFractionX * 8);
-        // const boardTileY = Math.floor(boardFractionY * 8);
-
-        this.onTileClick();
+        this.onTileClick(boardTileX, boardTileY);
     }
 
     onTileClick(tileX: number, tileY: number) {
@@ -62,15 +56,18 @@ export class GameBoard {
     }
 
     tryMove(x: number, y: number) {
-        //TODO: validate move
+        // is there already somebody there?
+        if (this.board.getPiece(x, y) !== undefined) {
+            return;
+        }
 
         this.doMove({ x, y, piece: this.currentTurn });
 
         // mark it as the other players turn now
         this.currentTurn = this.currentTurn === 'cross' ? 'circle' : 'cross';
 
-        window.setTimeout(() => {
-            this.aiMove();
-        }, 1000);
+        // window.setTimeout(() => {
+        //     this.aiMove();
+        // }, 1000);
     }
 }
