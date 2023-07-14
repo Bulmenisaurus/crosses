@@ -7,7 +7,7 @@ export interface Move {
     piece: Player;
 }
 
-// If I used python I could've just used list[tuple[int, int]]... :(
+// If I used python I could've just used set[tuple[int, int]]... :(
 const addIfUnique = (tiles: Coordinate[], coordinate: Coordinate) => {
     const alreadyContainsCoordinate = tiles.some(
         ({ x, y }) => x === coordinate.x && y === coordinate.y
