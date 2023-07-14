@@ -8,12 +8,16 @@ export const findMove = (
     difficulty: Difficulty
 ): Move | undefined => {
     // TODO: check game completed
+    if (gameCompleted(board)) {
+        return undefined;
+    }
 
-    const moveDepthSearch: number = {
-        easy: 0,
-        medium: 1,
-        hard: 2,
-    }[difficulty];
+    // const moveDepthSearch: number = {
+    //     easy: 0,
+    //     medium: 1,
+    //     hard: 2,
+    // }[difficulty];
+    const moveDepthSearch = 10;
 
     const allMoves = generateAllMoves(board, aiColor);
     const orderedMoves = orderMoves(allMoves, aiColor);
@@ -46,6 +50,8 @@ export const findMove = (
         }
 
         board.undoMove(move);
+        board.isFinished = false;
+        board.winningPlayer = undefined;
 
         if (ourScore > bestMoveScore) {
             bestMoveScore = ourScore;
@@ -58,7 +64,7 @@ export const findMove = (
     const endTime = Date.now();
     console.log(`Took ${endTime - startTime}ms to evaluate positions (difficulty=${difficulty})`);
 
-    console.log(`Choosing one of ${bestMoves.length} options`);
+    console.log(`Choosing one of ${bestMoves.length} options (score=${bestMoveScore})`);
     return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 };
 
@@ -79,6 +85,8 @@ const orderMoves = (moves: Move[], playerToMove: Player) => {
 
 const evaluateMove = (move: Move, playerToMove: Player): number => {
     // TODO
+
+    return 0;
 };
 
 const recursiveBoardSearchAlphaBeta = (
@@ -124,17 +132,21 @@ const recursiveBoardSearchAlphaBeta = (
  */
 const evaluate = (board: Board, playerToMove: Player): number => {
     // TODO
-    // const whiteScore = countPlayerScore('white', board);
-    // const blackScore = countPlayerScore('black', board);
-    // const evaluation = whiteScore - blackScore;
-    // const perspective = playerToMove === 'white' ? 1 : -1;
-    // return evaluation * perspective;
+    const circleScore = countPlayerScore('circle', board);
+    const crossScore = countPlayerScore('cross', board);
+    const evaluation = circleScore - crossScore;
+    const perspective = playerToMove === 'circle' ? 1 : -1;
+    return evaluation * perspective;
 };
 
-export const countPlayerScore = (player: Piece, board: Board) => {
-    // TODO: evaluation function
+export const countPlayerScore = (player: Player, board: Board) => {
+    if (board.isFinished && board.winningPlayer === player) {
+        return 1;
+    }
+
+    return 0;
 };
 
 export const gameCompleted = (board: Board): boolean => {
-    //TODO
+    return board.isFinished;
 };

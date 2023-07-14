@@ -1,5 +1,7 @@
 import { GameBoard } from './gameBoard';
+import { potentialMoveSquares } from './moves';
 import { ScrollableCanvas } from './scrollableCanvas';
+import { Coordinate } from './types';
 
 const drawGridLines = (interactiveCanvas: ScrollableCanvas, ctx: CanvasRenderingContext2D) => {
     const viewPort = interactiveCanvas.getViewPort();
@@ -77,6 +79,20 @@ const drawPieces = (
     }
 };
 
+const debugSquares = (
+    interactiveCanvas: ScrollableCanvas,
+    ctx: CanvasRenderingContext2D,
+    squares: Coordinate[]
+) => {
+    for (const tile of squares) {
+        const canvasCoords = interactiveCanvas.gameToCanvasCoord(tile.x, tile.y);
+        const size = interactiveCanvas.gameToCanvasDistance(1);
+
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+        ctx.fillRect(canvasCoords.x, canvasCoords.y, size, size);
+    }
+};
+
 export const renderBoard = (board: GameBoard, interactiveCanvas: ScrollableCanvas) => {
     const ctx = interactiveCanvas.canvasElement.getContext('2d')!;
 
@@ -91,6 +107,7 @@ export const renderBoard = (board: GameBoard, interactiveCanvas: ScrollableCanva
 
     drawGridLines(interactiveCanvas, ctx);
     drawPieces(board, interactiveCanvas, ctx);
+    debugSquares(interactiveCanvas, ctx, potentialMoveSquares(board.board));
 
     window.requestAnimationFrame(() => renderBoard(board, interactiveCanvas));
 };

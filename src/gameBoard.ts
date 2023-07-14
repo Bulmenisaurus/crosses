@@ -37,6 +37,10 @@ export class GameBoard {
     }
 
     onTileClick(tileX: number, tileY: number) {
+        if (this.currentTurn !== 'cross') {
+            console.warn('not your turn');
+            return;
+        }
         this.tryMove(tileX, tileY);
     }
 
@@ -66,8 +70,8 @@ export class GameBoard {
         // mark it as the other players turn now
         this.currentTurn = this.currentTurn === 'cross' ? 'circle' : 'cross';
 
-        // window.setTimeout(() => {
-        //     this.aiMove();
-        // }, 1000);
+        window.setTimeout(() => {
+            this.aiMove();
+        }, 1000);
     }
 }

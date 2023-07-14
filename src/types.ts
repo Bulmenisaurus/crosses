@@ -1,5 +1,6 @@
 export type Player = 'circle' | 'cross';
-export type Piece = { x: number; y: number; type: Player };
+export type Coordinate = { x: number; y: number };
+export type Piece = Coordinate & { type: Player };
 export type Tile = 'black' | 'white';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';

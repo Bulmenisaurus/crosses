@@ -80,7 +80,6 @@ export class ScrollableCanvas {
         const clamp = (min: number, x: number, max: number) => Math.max(Math.min(x, max), min);
 
         const targetZoom = this.cameraZoom * (1 / base ** scrollAmount);
-        console.log(targetZoom);
         this.cameraZoom = clamp(6, targetZoom, 30);
 
         // this.reRender();

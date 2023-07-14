@@ -29,27 +29,49 @@
   };
 
   // src/moves.ts
-  var generateAllMoves;
+  var addIfUnique, potentialMoveSquares, generateAllMoves;
   var init_moves = __esm({
     "src/moves.ts"() {
       "use strict";
+      addIfUnique = (tiles, coordinate) => {
+        const alreadyContainsCoordinate = tiles.some(
+          ({ x, y }) => x === coordinate.x && y === coordinate.y
+        );
+        if (!alreadyContainsCoordinate) {
+          tiles.push(coordinate);
+        }
+      };
+      potentialMoveSquares = (board) => {
+        const tiles = [];
+        board.pieces.forEach((p) => {
+          addIfUnique(tiles, { x: p.x + 1, y: p.y });
+          addIfUnique(tiles, { x: p.x, y: p.y - 1 });
+          addIfUnique(tiles, { x: p.x - 1, y: p.y });
+          addIfUnique(tiles, { x: p.x, y: p.y + 1 });
+          addIfUnique(tiles, { x: p.x - 1, y: p.y + 1 });
+          addIfUnique(tiles, { x: p.x + 1, y: p.y + 1 });
+          addIfUnique(tiles, { x: p.x + 1, y: p.y - 1 });
+          addIfUnique(tiles, { x: p.x - 1, y: p.y - 1 });
+        });
+        return tiles.filter((tile) => board.getPiece(tile.x, tile.y) === void 0);
+      };
       generateAllMoves = (board, pieceColor) => {
+        return potentialMoveSquares(board).map((tile) => ({ x: tile.x, y: tile.y, piece: pieceColor }));
       };
     }
   });
 
   // src/ai.ts
-  var findMove, orderMoves, evaluateMove, recursiveBoardSearchAlphaBeta, evaluate, gameCompleted;
+  var findMove, orderMoves, evaluateMove, recursiveBoardSearchAlphaBeta, evaluate, countPlayerScore, gameCompleted;
   var init_ai = __esm({
     "src/ai.ts"() {
       "use strict";
       init_moves();
       findMove = (board, aiColor, difficulty) => {
-        const moveDepthSearch = {
-          easy: 0,
-          medium: 1,
-          hard: 2
-        }[difficulty];
+        if (gameCompleted(board)) {
+          return void 0;
+        }
+        const moveDepthSearch = 10;
         const allMoves = generateAllMoves(board, aiColor);
         const orderedMoves = orderMoves(allMoves, aiColor);
         let bestMoves = [];
@@ -71,6 +93,8 @@
             ourScore = -opponentScore;
           }
           board.undoMove(move);
+          board.isFinished = false;
+          board.winningPlayer = void 0;
           if (ourScore > bestMoveScore) {
             bestMoveScore = ourScore;
             bestMoves = [move];
@@ -80,7 +104,7 @@
         }
         const endTime = Date.now();
         console.log(`Took ${endTime - startTime}ms to evaluate positions (difficulty=${difficulty})`);
-        console.log(`Choosing one of ${bestMoves.length} options`);
+        console.log(`Choosing one of ${bestMoves.length} options (score=${bestMoveScore})`);
         return bestMoves[Math.floor(Math.random() * bestMoves.length)];
       };
       orderMoves = (moves, playerToMove) => {
@@ -89,6 +113,7 @@
         }).reverse();
       };
       evaluateMove = (move, playerToMove) => {
+        return 0;
       };
       recursiveBoardSearchAlphaBeta = (depth, board, playerToMove, alpha, beta) => {
         const playerFinished = gameCompleted(board);
@@ -114,8 +139,20 @@
         return alpha;
       };
       evaluate = (board, playerToMove) => {
+        const circleScore = countPlayerScore("circle", board);
+        const crossScore = countPlayerScore("cross", board);
+        const evaluation = circleScore - crossScore;
+        const perspective = playerToMove === "circle" ? 1 : -1;
+        return evaluation * perspective;
+      };
+      countPlayerScore = (player, board) => {
+        if (board.isFinished && board.winningPlayer === player) {
+          return 1;
+        }
+        return 0;
       };
       gameCompleted = (board) => {
+        return board.isFinished;
       };
     }
   });
@@ -128,15 +165,25 @@
       Board = class {
         constructor() {
           this.pieces = [];
+          this.isFinished = false;
         }
         getPiece(x, y) {
           var _a;
           return (_a = this.pieces.find((p) => p.x === x && p.y === y)) == null ? void 0 : _a.type;
         }
-        setPiece(x, y, piece) {
-          this.pieces.push({ x, y, type: piece });
+        setPiece(x, y, pieceColor) {
+          this.pieces.push({ x, y, type: pieceColor });
+          if (this.is5LineThroughTile(x, y, pieceColor)) {
+            this.isFinished = true;
+            this.winningPlayer = pieceColor;
+          }
         }
         removePiece(x, y) {
+          const pieceIndex = this.pieces.findIndex((p) => p.x === x && p.y === y);
+          if (pieceIndex === -1) {
+            throw new Error(`Piece at ${x}, ${y} does not exists`);
+          }
+          this.pieces.splice(pieceIndex, 1);
         }
         getTileColor(x, y) {
           return ["white", "black"][(x + y) % 2];
@@ -146,6 +193,40 @@
         }
         undoMove(move) {
           this.removePiece(move.x, move.y);
+        }
+        is5LineThroughTile(x, y, piece) {
+          let inARow = 0;
+          const check = (tx, ty) => {
+            if (this.getPiece(tx, ty) == piece) {
+              inARow++;
+            } else {
+              inARow = 0;
+            }
+            if (inARow == 5) {
+              return true;
+            }
+          };
+          for (let tx = x - 4, ty = y; tx <= x + 4; tx++) {
+            if (check(tx, ty)) {
+              return true;
+            }
+          }
+          for (let tx = x, ty = y - 4; ty <= y + 4; ty++) {
+            if (check(tx, ty)) {
+              return true;
+            }
+          }
+          for (let tx = x - 4, ty = y - 4; tx <= x + 4; tx++, ty++) {
+            if (check(tx, ty)) {
+              return true;
+            }
+          }
+          for (let tx = x + 4, ty = y - 4; ty <= y + 4; tx--, ty++) {
+            if (check(tx, ty)) {
+              return true;
+            }
+          }
+          return false;
         }
       };
     }
@@ -180,6 +261,10 @@
           this.onTileClick(boardTileX, boardTileY);
         }
         onTileClick(tileX, tileY) {
+          if (this.currentTurn !== "cross") {
+            console.warn("not your turn");
+            return;
+          }
           this.tryMove(tileX, tileY);
         }
         aiMove() {
@@ -200,16 +285,20 @@
           }
           this.doMove({ x, y, piece: this.currentTurn });
           this.currentTurn = this.currentTurn === "cross" ? "circle" : "cross";
+          window.setTimeout(() => {
+            this.aiMove();
+          }, 1e3);
         }
       };
     }
   });
 
   // src/render.ts
-  var drawGridLines, drawPieces, renderBoard;
+  var drawGridLines, drawPieces, debugSquares, renderBoard;
   var init_render = __esm({
     "src/render.ts"() {
       "use strict";
+      init_moves();
       drawGridLines = (interactiveCanvas, ctx) => {
         const viewPort = interactiveCanvas.getViewPort();
         const startXSnapped = Math.floor(viewPort.topLeft.x);
@@ -265,6 +354,14 @@
           }
         }
       };
+      debugSquares = (interactiveCanvas, ctx, squares) => {
+        for (const tile of squares) {
+          const canvasCoords = interactiveCanvas.gameToCanvasCoord(tile.x, tile.y);
+          const size = interactiveCanvas.gameToCanvasDistance(1);
+          ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+          ctx.fillRect(canvasCoords.x, canvasCoords.y, size, size);
+        }
+      };
       renderBoard = (board, interactiveCanvas) => {
         const ctx = interactiveCanvas.canvasElement.getContext("2d");
         ctx.clearRect(
@@ -276,6 +373,7 @@
         ctx.fillStyle = "black";
         drawGridLines(interactiveCanvas, ctx);
         drawPieces(board, interactiveCanvas, ctx);
+        debugSquares(interactiveCanvas, ctx, potentialMoveSquares(board.board));
         window.requestAnimationFrame(() => renderBoard(board, interactiveCanvas));
       };
     }
@@ -358,7 +456,6 @@
           const base = 1.005;
           const clamp = (min, x, max) => Math.max(Math.min(x, max), min);
           const targetZoom = this.cameraZoom * (1 / base ** scrollAmount);
-          console.log(targetZoom);
           this.cameraZoom = clamp(6, targetZoom, 30);
         }
         onMouseDown(e) {
@@ -436,4 +533,3 @@
   });
   require_src();
 })();
-//!TODO
